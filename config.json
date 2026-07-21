@@ -1,0 +1,30 @@
+{
+  "max_loops": 3,
+  "eval_max_response_chars": 4000,
+  "initial_prompt": " You are a Business Analyst.\n\nFor the application: {user_query}, write a software requirements document. Include an introduction, user roles, key features, functional requirements, non-functional requirements, database design, and a high-level workflow.\n\nKeep it concise and well organized.",
+  "optimizer_prompt": "You are a Prompt Optimization Expert. Your objective is to improve the prompt.\n1. Analyse the poorly-scoring tasks together.\n2. Find ONLY weaknesses that appear across MULTIPLE poorly-scoring tasks.\n3. Ignore one-off mistakes.\n4. Do NOT propose a change that would contradict or undo something the well-scoring tasks show is already working.\n5. Do NOT rewrite the original prompt.\n6. Do NOT repeat rules that already exist.\n7. Generate ONLY NEW prompt instructions.\nIf there are no recurring issues return ONLY: NONE\nOtherwise return ONLY bullet points.",
+  "evaluation_steps": [
+    "Check that user roles are capped at 5, key features at 10, functional requirements at around 10, and non-functional requirements at around 5 — the response should not significantly exceed these counts.",
+    "Check that the total response length is roughly under 600 words.",
+    "Check that each section uses bullet points and/or tables rather than long paragraphs."
+  ],
+  "required_sections": [
+    {"name": "Introduction", "synonyms": ["introduction", "overview"]},
+    {"name": "User Roles", "synonyms": ["user roles", "roles", "actors"]},
+    {"name": "Key Features", "synonyms": ["key features", "features"]},
+    {"name": "Functional Requirements", "synonyms": ["functional requirements"]},
+    {"name": "Non-Functional Requirements", "synonyms": ["non-functional requirements", "non functional requirements"]},
+    {"name": "Database Tables", "synonyms": ["database tables", "database design", "data model"]},
+    {"name": "High-Level Workflow", "synonyms": ["high-level workflow", "workflow"]}
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "query": "Employee Leave Management System"
+    },
+    {
+      "id": 2,
+      "query": "Vendor Onboarding and Procurement System"
+    }
+  ]
+}
