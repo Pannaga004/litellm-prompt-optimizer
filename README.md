@@ -48,18 +48,13 @@ pip install litellm-prompt-optimizer
 pip install pip-tools
 ```
 
-Create a `requirements.in` file in your project root:
+Create a `requirements.txt` file in your project root:
 ```
 litellm==1.91.4
-deepeval
+deepeval==4.1.2
 python-docx
 python-dotenv
 litellm-prompt-optimizer
-```
-
-Then generate the lockfile:
-```bash
-pip-compile requirements.in
 ```
 
 This produces a `requirements.txt` lockfile with exact, resolved versions for every dependency. Install from it with:
