@@ -4,15 +4,19 @@ A provider-agnostic prompt optimization pipeline powered by [LiteLLM](https://gi
 
 Give it an initial prompt, a set of tasks, and an evaluation rubric — it will generate responses, score them with an LLM judge, and automatically rewrite the prompt to fix recurring weaknesses across multiple optimization loops.
 
-## Features
+## Functionality
 
 - **Provider-agnostic** — works with any LiteLLM-supported model (Gemini, Groq, OpenAI, Anthropic, on-prem Ollama, etc.) for both generation and judging, just by changing a model string.
 - **On-prem / local model support** — point generation and/or evaluation at a local Ollama instance instead of a cloud API, with no code changes required.
+- **Independent model routing** — generation and evaluation models are configured separately, so you can mix providers (e.g. generate locally, evaluate in the cloud) or use the same one for both.
 - **Automated feedback loop** — generates responses, scores them, and rewrites the prompt to target only *recurring* weaknesses (not one-off mistakes).
-- **Regression-safe** — always keeps the best-scoring prompt version found so far, even if a later candidate performs worse.
-- **Blended scoring** — combines a custom rubric (`GEval`) with a generic relevance check (`AnswerRelevancyMetric`).
-- **Deterministic section checks** — optionally verifies required sections are present and in order, independent of the LLM judge's leniency.
-- **Full telemetry** — tracks token usage, timing, and per-task score deltas across every loop.
+- **Multi-loop optimization** — runs the generate → evaluate → optimize cycle for a configurable number of loops (`max_loops`), stopping early once a score threshold is met.
+- **Regression-safe** — always keeps the best-scoring prompt version found so far, even if a later candidate performs worse; regressed candidates are logged but never become the new baseline.
+- **Blended scoring** — combines a custom rubric (`GEval`) with a generic relevance check (`AnswerRelevancyMetric`), with configurable weighting between the two.
+- **Deterministic section checks** — optionally verifies required sections/headings are present and in the correct order, independent of the LLM judge's leniency, with configurable score penalties.
+- **Bounded instruction growth** — new optimizer instructions are merged and deduplicated into a capped bullet list each loop, instead of growing the prompt indefinitely.
+- **Full telemetry** — tracks token usage (generation / judge / optimizer, separately and combined), timing per task, and per-task score deltas across every loop.
+- **Prompt version history** — every prompt candidate tried (V0, V1, V2, ...) is retained and reported, alongside which version was ultimately selected as best.
 
 ## Prerequisites
 
@@ -163,6 +167,38 @@ prompt-optimizer --config config.json --env .env --output results.json
 Small local models can be less reliable at producing strictly valid JSON for the LLM judge than larger cloud models. If you see JSON-parsing errors from the evaluator, consider keeping generation local (`ollama/...`) while pointing `EVAL_MODEL_NAME` at a cloud model instead.
 
 ## How it works
+
+```mermaid
+flowchart TD
+    A([Start: Initial Prompt V0]) --> B[Generate<br/>Run prompt against every task]
+    B --> C[Evaluate<br/>GEval + AnswerRelevancy +<br/>optional section check]
+    C --> D[Compute average score<br/>for this version]
+    D --> E{Best score<br/>so far?}
+    E -- YES --> F[Save as<br/>new best version]
+    E -- NO --> G[Keep previous best,<br/>log regression]
+    F --> H{Threshold met<br/>OR max loops<br/>reached?}
+    G --> H
+    H -- YES --> I([Stop<br/>Return best prompt<br/>+ telemetry])
+    H -- NO --> J[Optimizer analyzes<br/>recurring weaknesses]
+    J --> K{New recurring<br/>issues found?}
+    K -- NO --> I
+    K -- YES --> L[Merge instructions<br/>-> next prompt version]
+    L -.->|try next version| B
+
+    classDef startstop fill:#D1FAE5,stroke:#10B981,stroke-width:2px,color:#065F46
+    classDef generate fill:#DBEAFE,stroke:#2563EB,stroke-width:2px,color:#1E3A8A
+    classDef evaluate fill:#EDE9FE,stroke:#7C3AED,stroke-width:2px,color:#4C1D95
+    classDef compare fill:#FCE7F3,stroke:#DB2777,stroke-width:2px,color:#831843
+    classDef decision fill:#FFEDD5,stroke:#EA580C,stroke-width:2px,color:#7C2D12
+    classDef optimize fill:#CCFBF1,stroke:#0D9488,stroke-width:2px,color:#134E4A
+
+    class A,I startstop
+    class B generate
+    class C evaluate
+    class D,F,G compare
+    class E,H,K decision
+    class J,L optimize
+```
 
 1. **Generate** — the current prompt is run against every task using the generation model.
 2. **Evaluate** — each response is scored by an LLM judge using your custom rubric, blended with a generic relevance check, plus an optional deterministic required-section check.
