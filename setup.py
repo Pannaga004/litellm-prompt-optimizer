@@ -5,14 +5,22 @@ long_description = Path("README.md").read_text(encoding="utf-8")
 
 setup(
     name="litellm_prompt_optimizer",
-    version="0.5.0",
+    version="0.5.1",  # bumped -- PyPI won't let you re-upload 0.5.0
     description="Provider-agnostic prompt optimization pipeline powered by LiteLLM.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="MIT",
     packages=find_packages(),
+
+    # NEW: makes sure non-.py files listed in package_data get bundled
+    # into the built wheel/sdist, not just .py source files.
+    include_package_data=True,
+    package_data={
+        "prompt_optimizer": ["README.md"],
+    },
+
     install_requires=[
-        "litellm",
+        "litellm<1.93",  # pin below the first version with no Windows wheel
         "deepeval",
         "python-docx",
         "python-dotenv"

@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import shutil
 import sys
 import warnings
 
@@ -9,6 +10,33 @@ from dotenv import load_dotenv
 from .pipeline import run_optimization_pipeline
 
 warnings.filterwarnings("ignore")
+
+
+def copy_readme_if_missing():
+    """
+    Drops a copy of the README into the user's current working directory,
+    the first time they run the CLI from that folder. Never overwrites an
+    existing copy, so it only happens once per project folder.
+
+    The README has to be bundled INSIDE the installed package for this to
+    work (see setup.py's package_data + include_package_data=True, and
+    make sure README.md is physically copied into the prompt_optimizer/
+    package folder before building -- see build_readme_copy.py / build
+    step notes below).
+    """
+    dest = os.path.join(os.getcwd(), "PROMPT_OPTIMIZER_README.md")
+    if os.path.exists(dest):
+        return  # already dropped here before, don't overwrite
+
+    source = os.path.join(os.path.dirname(__file__), "README.md")
+    if not os.path.exists(source):
+        return  # README wasn't bundled into the installed package -- skip silently
+
+    try:
+        shutil.copy(source, dest)
+        print(f"[+] Docs copied to {dest} (see it for full setup instructions)")
+    except OSError:
+        pass  # e.g. read-only directory -- not worth failing the whole run over
 
 
 def wrap_text(text, width=63, indent="    "):
@@ -180,6 +208,8 @@ def main():
     installed `prompt-optimizer` terminal command (see setup.py's
     console_scripts entry point, which points here).
     """
+    copy_readme_if_missing()
+
     parser = argparse.ArgumentParser(
         description="Run the LLM prompt optimizer using settings from config.json and .env."
     )
