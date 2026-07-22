@@ -5,7 +5,7 @@ long_description = Path("README.md").read_text(encoding="utf-8")
 
 setup(
     name="litellm_prompt_optimizer",
-    version="0.5.1",  # bumped -- PyPI won't let you re-upload 0.5.0
+    version="0.5.2",  # bumped -- PyPI won't let you re-upload 0.5.0
     description="Provider-agnostic prompt optimization pipeline powered by LiteLLM.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -20,7 +20,7 @@ setup(
     },
 
     install_requires=[
-        "litellm<1.93",  # pin below the first version with no Windows wheel
+        "litellm==1.91.4",  
         "deepeval",
         "python-docx",
         "python-dotenv"
