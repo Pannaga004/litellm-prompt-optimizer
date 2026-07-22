@@ -54,7 +54,6 @@ litellm==1.91.4
 deepeval==4.1.2
 python-docx
 python-dotenv
-litellm-prompt-optimizer
 ```
 
 This produces a `requirements.txt` lockfile with exact, resolved versions for every dependency. Install from it with:
@@ -126,10 +125,6 @@ pip install -r requirements.txt
     | `tasks` | **Yes** | List of `{ "id": ..., "query": ... }` objects — the test inputs run through your prompt each loop. |
 
 ## Usage
-
-```bash
-prompt-optimizer
-```
 
 Optional flags:
 
