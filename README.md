@@ -20,7 +20,7 @@ Give it an initial prompt, a set of tasks, and an evaluation rubric — it will 
 
 ## Prerequisites
 
-- **Python:** 3.10+
+- **Python:** 3.12
 - **Pip:** 26.1.2+
 
 Check your versions:
